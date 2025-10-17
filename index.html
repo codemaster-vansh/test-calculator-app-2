@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A simple calculator application for basic arithmetic operations.">
+    <meta property="og:title" content="Simple Calculator">
+    <meta property="og:description" content="Perform addition, subtraction, multiplication, and division easily.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yourdomain.com">
+    <meta property="og:image" content="https://yourdomain.com/image.png">
+    <title>Simple Calculator</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --secondary: #f44336;
+            --background-light: #ffffff;
+            --background-dark: #121212;
+            --text-light: #000000;
+            --text-dark: #ffffff;
+            --spacing-unit: 8px;
+            --border-radius: 4px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            transition: background-color 0.3s;
+        }
+
+        .calculator {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-unit);
+            max-width: 400px;
+            padding: var(--spacing-unit);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background-color: var(--background-light);
+        }
+
+        .calculator input {
+            grid-column: span 4;
+            padding: var(--spacing-unit);
+            font-size: 1.5rem;
+            border: 1px solid var(--primary);
+            border-radius: var(--border-radius);
+            transition: border-color 0.3s;
+        }
+
+        .calculator button {
+            padding: var(--spacing-unit);
+            font-size: 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .calculator button:hover {
+            background-color: var(--primary);
+            color: var(--text-dark);
+        }
+
+        .calculator button:active {
+            background-color: var(--secondary);
+            color: var(--text-dark);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: var(--background-dark);
+                color: var(--text-dark);
+            }
+            .calculator {
+                background-color: var(--background-dark);
+            }
+            .calculator input {
+                border: 1px solid var(--secondary);
+            }
+        }
+    </style>
+</head>
+<body>
+    <main role="main">
+        <section class="calculator" aria-label="Calculator">
+            <input type="text" id="display" aria-label="Display" readonly>
+            <button aria-label="Clear" id="clear">C</button>
+            <button aria-label="Divide" id="divide">/</button>
+            <button aria-label="Multiply" id="multiply">*</button>
+            <button aria-label="Subtract" id="subtract">-</button>
+            <button aria-label="Add" id="add">+</button>
+            <button aria-label="Calculate" id="equals">=</button>
+            <button aria-label="Number 7">7</button>
+            <button aria-label="Number 8">8</button>
+            <button aria-label="Number 9">9</button>
+            <button aria-label="Number 4">4</button>
+            <button aria-label="Number 5">5</button>
+            <button aria-label="Number 6">6</button>
+            <button aria-label="Number 1">1</button>
+            <button aria-label="Number 2">2</button>
+            <button aria-label="Number 3">3</button>
+            <button aria-label="Number 0">0</button>
+        </section>
+    </main>
+    <script>
+        'use strict';
+
+        const display = document.getElementById('display');
+        const buttons = Array.from(document.querySelectorAll('.calculator button'));
+        let currentInput = '';
+        let operator = '';
+        let firstOperand = null;
+
+        const clearDisplay = () => {
+            currentInput = '';
+            operator = '';
+            firstOperand = null;
+            display.value = '';
+        };
+
+        const calculate = () => {
+            if (firstOperand === null || operator === '' || currentInput === '') return;
+            const secondOperand = parseFloat(currentInput);
+            let result;
+
+            try {
+                switch (operator) {
+                    case '+':
+                        result = firstOperand + secondOperand;
+                        break;
+                    case '-':
+                        result = firstOperand - secondOperand;
+                        break;
+                    case '*':
+                        result = firstOperand * secondOperand;
+                        break;
+                    case '/':
+                        if (secondOperand === 0) throw new Error('Division by zero');
+                        result = firstOperand / secondOperand;
+                        break;
+                    default:
+                        throw new Error('Invalid operation');
+                }
+                display.value = result;
+                currentInput = result.toString();
+                operator = '';
+                firstOperand = null;
+            } catch (error) {
+                display.value = 'Error';
+                setTimeout(clearDisplay, 1500);
+            }
+        };
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                const value = button.textContent;
+
+                if (value === 'C') {
+                    clearDisplay();
+                } else if (['+', '-', '*', '/'].includes(value)) {
+                    if (currentInput !== '') {
+                        firstOperand = parseFloat(currentInput);
+                    }
+                    operator = value;
+                    currentInput = '';
+                } else if (value === '=') {
+                    calculate();
+                } else {
+                    currentInput += value;
+                    display.value = currentInput;
+                }
+            });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                calculate();
+            } else if (event.key === 'Escape') {
+                clearDisplay();
+            } else if ('0123456789+-*/'.includes(event.key)) {
+                const button = buttons.find(btn => btn.textContent === event.key);
+                if (button) button.click();
+            }
+        });
+
+        // Initialize on DOM ready
+        document.addEventListener('DOMContentLoaded', () => {
+            clearDisplay();
+        });
+    </script>
+</body>
+</html>
